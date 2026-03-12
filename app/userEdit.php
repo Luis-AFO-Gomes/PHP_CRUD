@@ -1,0 +1,256 @@
+<!------------------------------------------------------------------------------------
+  -- Acesso a Bases de Dados (MySQL) com PHP                                        --  
+  -- Exemplo de ligação a uma base de dados MySQL usando PDO (PHP Data Objects)     --
+  --                                                                                --
+  -- Requer acesso a SGBD MySQL com os seguintes elementos:                         --
+  --   - base de dados epge25_sim                                                   --  
+  --   - tabela utilizadores(                                                       --         
+  --       username VARCHAR(30) NOT NULL PK,                                        --  
+  --       password VARCHAR(255) NOT NULL,                                          --  
+  --       user VARCHAR(50) NOT NULL IX,                                            --  
+  --       email VARCHAR(640) NOT NULL AK                                           --  
+  ------------------------------------------------------------------------------------>
+<?php
+    $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+/*	$pathOnly é utilizado para obter o caminho da página actual sem o nome do ficheiro para ser utilizado 
+	na construção do URL de redireccionamento para a página de login no caso de utilizador não identificado
+
+	Num servidor web pode utilizar-se a variável 'PATH_INFO', que não está definida quando se utiliza LOCALHOST
+	Pode-se testar esta variável utilizando
+		echo $_SERVER['SERVER_NAME'].'<br>';
+	Que não devolverá qualquer valor para servidor locais sem path definida
+ */	
+?> 
+<html>
+    <head>
+	    <title>Exemplo crUd em PHP: Editar Utilizador</title>
+        
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="style/style.css" type="text/css">
+	
+	<script type="text/javascript">
+	    function verPreenche(campo){
+//  função para verificar se um dado campo de preenchimento obrigatorio está preenchido
+            with (campo){
+                if (value==null||value==""){
+//  verifica-se se o campo está vazio ou se tem uma string nula                    
+//				    alert("vazio");
+				    return false;
+				}
+			    else{
+//				    alert("preenchido");
+				    return true;
+				}
+		    }
+	    }
+	
+		function validarMail(endereco){
+    		with (endereco){
+				posAt=value.indexOf("@");
+				posPonto=value.lastIndexOf(".");
+				if (posAt<1||posPonto-posAt<2){
+					return false;
+					}
+				else{
+					return true;
+					}
+				}
+			}
+
+		function validarForm(formulario){
+            var txtOutput="";
+                var valido=true;
+                var txtStatus="";
+                with (formulario){
+//  Verificar preenchimento do campo USERNAME
+//  Altera-se formato e alerta-se o utilizador se o campo não estiver preenchido
+                    if (verPreenche(username)==false){				
+                        username.focus();
+                        document.getElementById('frmUserName').style.color='red';
+                        txtStatus=txtStatus + "username nao esta preenchido \n ";
+                        valido=false;
+                    } else {
+					    document.getElementById('frmUserName').style.color='blue';
+				    }
+
+//  Verificar preenchimento do campo Nome de utilizador
+//  Altera-se formato e alerta-se o utilizador se o campo não estiver preenchido
+				    if (verPreenche(nome)==false){		
+                        nome.focus();
+                        document.getElementById('frmNome').style.color='red';
+                        txtStatus=txtStatus + "Nome nao esta preenchido \n ";
+                        valido=false;
+                    } else {
+                        document.getElementById('frmNome').style.color='blue';
+                    }
+
+//  Verificar preenchimento do campo Email
+//  Altera-se formato e alerta-se o utilizador se o campo não estiver preenchido
+//  No caso do email, além de verificar o prenchimento, também se verifica o formato do endereço
+				    if (verPreenche(email)==false){		
+                        email.focus();
+                        document.getElementById('frmEmail').style.color='red';
+                        txtStatus=txtStatus + "Email nao esta preenchido \n ";
+                        valido=false;
+                    } else if (validarMail(email)==false){
+                        email.focus();
+                        document.getElementById('frmEmail').style.color='red';
+                        txtStatus=txtStatus + "Email com formato invalido \n ";
+                        valido=false;
+                    }else {
+                        document.getElementById('frmEmail').style.color='blue';
+                    }
+
+
+                }
+
+                if (valido==false){
+                    alert ("Verifique preenchimento do formulario \n "+txtStatus+" \n *Campos de Preenchimento obrigatorio","erro de preenchimento");
+    			}
+			return valido;
+		}
+	</script>
+	</head>
+
+	<body>
+        <h1>Alterar um utilizador na base de dados.</h1><br><br>
+        <?php
+            $action   = $_POST['action'] ?? 'edit';   // default
+            $username = $_POST['username'] ?? null;
+
+            if($username){
+                printf("<br>Alterar o utilizador ",$_POST['username']);  
+            
+                if ($action === 'edit') {
+        ?>
+
+                    <form action="<?php echo $_SERVER['PHP_SELF']; ?>" onsubmit="return validarForm(this);" method="post">
+                        <table align="center">
+                            <tr id="frmUserName">
+                                <td align="right" width="150">Nome de utilizador: </td>
+                                <td align="left"><input type="text" name="username" size="40" readonly></td>
+                                <td align="left" width="25">&nbsp</td>
+                            </tr>
+                            <tr id="frmNome" >
+                                <td align="right">Nome: </td>
+                                <td align="left"><input type="text" name="nome" size="40"></td>
+                                <td align="left" width="25">*</td>
+                            </tr>
+                            <tr id="frmEmail" >
+                                <td align="right">Email: </td>
+                                <td align="left"><input type="text" name="email" size="40"></td>
+                                <td align="left" width="25">*</td>
+                            </tr>
+                            <tr>
+                                <td id="status" colspan="3">* preenchimeto obrigatorio</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" align="center">
+                                    <button type="submit" name="action" value="save">Guardar</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+        <?php 
+
+//  Ligação à base de dados, igual ao exemplo de listar utilizadores (index.php)
+                    $host = 'php_crud-mysql-1';
+                    $db   = 'php_crud';
+                    $user = 'root';
+                    $pass = 'my5@fEp@s5';
+                    $charset = 'utf8mb4';
+
+                    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+                    $options = [
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    ];
+
+                    try {
+                        $pdo = new PDO($dsn, $user, $pass, $options);
+
+    //  Obter dados de utilizador da base de dados e preencher o formulário de edição com os dados
+                        $sql_query = 'SELECT username,user,email FROM utilizadores WHERE username = :username';
+                        $stmt = $pdo->prepare($sql_query);
+                        $stmt->execute(['username' => $_POST['username']]);
+                        $userData = $stmt->fetch();
+
+                        if ($userData) {
+                            // Preencher o formulário com os dados do utilizador
+                            echo "<script>";
+                            echo "document.getElementsByName('username')[0].value = '".htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8')."';";
+                            echo "document.getElementsByName('nome')[0].value = '".htmlspecialchars($userData['user'], ENT_QUOTES, 'UTF-8')."';";
+                            echo "document.getElementsByName('email')[0].value = '".htmlspecialchars($userData['email'], ENT_QUOTES, 'UTF-8')."';";
+                            echo "</script>";
+                        } else {
+                            echo "Utilizador não encontrado.";
+                        }
+
+                    } catch (PDOException $e) {
+                        echo "Erro DB: " . $e->getMessage();
+                    }  
+                } elseif ($action === 'save') {
+                    // Processar os dados do formulário e atualizar o utilizador na base de dados
+                    // (a implementação desta parte depende da estrutura da tabela e dos campos do formulário)
+                    echo "Dados do formulário recebidos para salvar o utilizador: <br>";
+                    echo "Username: " . htmlspecialchars($_POST['username'], ENT_QUOTES, 'UTF-8') . "<br>";
+                    echo "Nome: " . htmlspecialchars($_POST['nome'], ENT_QUOTES, 'UTF-8') . "<br>";
+                    echo "Email: " . htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8') . "<br>";
+                    // Aqui se implementaria a lógica para atualizar o utilizador na base de dados usando uma
+                    // consulta SQL UPDATE com os dados recebidos do formulário
+
+                    //  Ligação à base de dados, igual ao exemplo de listar utilizadores (index.php)
+                    $host = 'epge25_sim-mysql-1';
+                    $db   = 'epge25_sim';
+                    $user = 'root';
+                    $pass = 'my5@fEp@s5';
+                    $charset = 'utf8mb4';
+
+                    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+                    $options = [
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    ];
+
+                    try {
+                        $pdo = new PDO($dsn, $user, $pass, $options);
+
+//  Converter e 'limpar' os dados recebidos do formulário
+//  A limpesa também podia ser feita no Javascript, antes do envio do formulário, mas é boa prática fazê-la no servidor
+//  -- operador 'null  coalescing' (??) evita aviso/erro por variáveis indefinidas/vazias
+//  -- Trim remove espaços em branco no início e no fim --
+                        $username = trim($_POST["username"] ?? "");
+                        $nome     = trim($_POST["nome"] ?? "");
+                        $email    = trim($_POST["email"] ?? "");
+
+                        if ($username === "" || $nome === "" || $email === "") {
+                            die("Erro: campos obrigatórios em falta.");
+                        }
+
+//  Atualizar o utilizador na base de dados usando uma consulta SQL UPDATE
+                        $sql_update = "UPDATE utilizadores SET user = :nome, email = :email WHERE username = :username";
+                        $stmt = $pdo->prepare($sql_update);
+                        
+//  Associar os valores aos parâmetros e executar a instrução SQL
+                        $stmt->execute([
+                            ':nome' => $nome, 
+                            ':email' => $email, 
+                            ':username' => $username
+                        ]);
+                        echo "Utilizador atualizado com sucesso.";
+
+                    } catch (PDOException $e) {
+                        echo "Erro DB: " . $e->getMessage();
+                    }
+                } else {
+                    http_response_code(400); exit('Invalid action');
+                }          
+            } else {
+                echo "Erro: utilizador não identificado.";
+                echo "<br><a href='$pathOnly/userList.php'>Voltar à lista de utilizadores</a>";
+            } 
+            ?>
+
+
+    </body> 
+</html>

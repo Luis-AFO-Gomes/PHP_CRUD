@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Listen for Xdebug (Docker)",
+            "type": "php",
+            "request": "launch",
+            "port": 9003,
+            "pathMappings": {
+                "/app": "${workspaceFolder}"
+            },
+            "log": true
+        },
+        {
+            "name": "Open site in Edge",
+            "type": "msedge",
+            "request": "launch",
+            "url": "http://localhost/${fileBasename}",
+            "webRoot": "${workspaceFolder}",
+            "runtimeExecutable": "stable",
+            "runtimeArgs": [
+                "--user-data-dir=${workspaceFolder}/.vscode/edge-debug-profile"
+            ]
+        },
+        {
+            "name": "Open site in Chrome",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost/${fileBasename}",
+            "webRoot": "${workspaceFolder}"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug PHP in Edge",
+            "configurations": [
+                "Listen for Xdebug (Docker)",
+                "Open site in Edge"
+            ]
+        },
+        {
+            "name": "Debug PHP in Chrome",
+            "configurations": [
+                "Listen for Xdebug (Docker)",
+                "Open site in Chrome"
+            ]
+        }
+    ]
+}
