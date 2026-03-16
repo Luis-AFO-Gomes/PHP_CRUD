@@ -56,6 +56,29 @@ INSERT INTO `utilizadores` (`username`, `password`, `user`, `email`) VALUES
 ('teste', '$2y$12$/A3Z4ar.n4F6E1duUcimQ.9GwI9L23pX0945Cii2.cOp/zxgLucvC', 'utilizador de teste', 'teste@teste.pt');
 COMMIT;
 
+DROP TABLE IF EXISTS `profile`;
+CREATE TABLE IF NOT EXISTS `profile` (
+	 code			    CHAR(3) 	    NOT NULL 
+	,designation	VARCHAR(20)	  NOT NULL 
+	,level			  int DEFAULT 1	NULL
+	,PRIMARY KEY (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+TRUNCATE TABLE `profile`;
+
+INSERT INTO `profile` (`code`, `designation`, `level`) 
+  VALUES  ('ADM', 'Administrador', 1),
+          ('PRO', 'Professor', 2),
+          ('ALN', 'Aluno', 2),
+		      ('ADN','administrativo',2);
+
+ALTER TABLE utilizadores ADD 
+	 COLUMN profile 	CHAR(3) DEFAULT 'ADM' NOT NULL;
+
+ALTER TABLE utilizadores ADD
+	CONSTRAINT fk_user_profile FOREIGN KEY (profile)
+		REFERENCES profile (code);          
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
