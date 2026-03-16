@@ -20,6 +20,7 @@
 		echo $_SERVER['SERVER_NAME'].'<br>';
 	Que não devolverá qualquer valor para servidor locais sem path definida
  */	
+	require_once __DIR__ . '/config.php';
 ?> 
 <html>
     <head>
@@ -141,6 +142,30 @@
                                 <td align="left"><input type="text" name="email" size="40"></td>
                                 <td align="left" width="25">*</td>
                             </tr>
+                            <tr id="frmProfile" >
+                                <td align="right"><label for="profile">Perfil: </label></td>
+                                <td align="left">
+<?php                               
+		try {
+			$pdo = new PDO($dsn, $user, $pass, $options);
+
+			// A ligação foi bem sucedida, agora pode executar consultas
+			$sql_query = 'SELECT p.code, p.designation  FROM profile p;';
+			$stmt = $pdo->query($sql_query);     
+                echo '<select name="profile" id="profile">';
+                echo '<option value="">--Selecione um perfil--</option>';
+			while ($row = $stmt->fetch()) {
+				echo '<option value="' . htmlspecialchars($row['code'], ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($row['designation'], ENT_QUOTES, 'UTF-8') . '</option>';
+			}
+            echo '</select>';
+        } catch (PDOException $e) {
+            echo "DB error: " . $e->getMessage();
+        }
+
+?>                                    
+                                </td>
+                                <td align="left" width="25">*</td>
+                            </tr>
                             <tr>
                                 <td id="status" colspan="3">* preenchimeto obrigatorio</td>
                             </tr>
@@ -152,25 +177,9 @@
                         </table>
                     </form>
         <?php 
-
-//  Ligação à base de dados, igual ao exemplo de listar utilizadores (index.php)
-                    $host = 'php_crud-mysql-1';
-                    $db   = 'php_crud';
-                    $user = 'root';
-                    $pass = 'my5@fEp@s5';
-                    $charset = 'utf8mb4';
-
-                    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-                    $options = [
-                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    ];
-
                     try {
-                        $pdo = new PDO($dsn, $user, $pass, $options);
-
     //  Obter dados de utilizador da base de dados e preencher o formulário de edição com os dados
-                        $sql_query = 'SELECT username,user,email FROM utilizadores WHERE username = :username';
+                        $sql_query = 'SELECT u.username,u.user,u.email, u.profile  FROM utilizadores u WHERE u.username = :username';
                         $stmt = $pdo->prepare($sql_query);
                         $stmt->execute(['username' => $_POST['username']]);
                         $userData = $stmt->fetch();
@@ -181,6 +190,7 @@
                             echo "document.getElementsByName('username')[0].value = '".htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8')."';";
                             echo "document.getElementsByName('nome')[0].value = '".htmlspecialchars($userData['user'], ENT_QUOTES, 'UTF-8')."';";
                             echo "document.getElementsByName('email')[0].value = '".htmlspecialchars($userData['email'], ENT_QUOTES, 'UTF-8')."';";
+                            echo "document.getElementById('profile').value = '".htmlspecialchars($userData['profile'], ENT_QUOTES, 'UTF-8')."';";
                             echo "</script>";
                         } else {
                             echo "Utilizador não encontrado.";
@@ -196,25 +206,9 @@
                     echo "Username: " . htmlspecialchars($_POST['username'], ENT_QUOTES, 'UTF-8') . "<br>";
                     echo "Nome: " . htmlspecialchars($_POST['nome'], ENT_QUOTES, 'UTF-8') . "<br>";
                     echo "Email: " . htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8') . "<br>";
-                    // Aqui se implementaria a lógica para atualizar o utilizador na base de dados usando uma
-                    // consulta SQL UPDATE com os dados recebidos do formulário
-
-                    //  Ligação à base de dados, igual ao exemplo de listar utilizadores (index.php)
-                    $host = 'epge25_sim-mysql-1';
-                    $db   = 'epge25_sim';
-                    $user = 'root';
-                    $pass = 'my5@fEp@s5';
-                    $charset = 'utf8mb4';
-
-                    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-                    $options = [
-                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    ];
+                    echo "Perfil: " . htmlspecialchars($_POST['profile'], ENT_QUOTES, 'UTF-8') . "<br>";
 
                     try {
-                        $pdo = new PDO($dsn, $user, $pass, $options);
-
 //  Converter e 'limpar' os dados recebidos do formulário
 //  A limpesa também podia ser feita no Javascript, antes do envio do formulário, mas é boa prática fazê-la no servidor
 //  -- operador 'null  coalescing' (??) evita aviso/erro por variáveis indefinidas/vazias
@@ -222,19 +216,21 @@
                         $username = trim($_POST["username"] ?? "");
                         $nome     = trim($_POST["nome"] ?? "");
                         $email    = trim($_POST["email"] ?? "");
+                        $profile  = trim($_POST["profile"] ?? "");
 
-                        if ($username === "" || $nome === "" || $email === "") {
+                        if ($username === "" || $nome === "" || $email === "" || $profile === "") {
                             die("Erro: campos obrigatórios em falta.");
                         }
 
 //  Atualizar o utilizador na base de dados usando uma consulta SQL UPDATE
-                        $sql_update = "UPDATE utilizadores SET user = :nome, email = :email WHERE username = :username";
+                        $sql_update = "UPDATE utilizadores SET user = :nome, email = :email, profile = :profile WHERE username = :username";
                         $stmt = $pdo->prepare($sql_update);
                         
 //  Associar os valores aos parâmetros e executar a instrução SQL
                         $stmt->execute([
                             ':nome' => $nome, 
                             ':email' => $email, 
+                            ':profile' => $profile,
                             ':username' => $username
                         ]);
                         echo "Utilizador atualizado com sucesso.";

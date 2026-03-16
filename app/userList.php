@@ -61,18 +61,19 @@
 			$pdo = new PDO($dsn, $user, $pass, $options);
 
 			// A ligação foi bem sucedida, agora pode executar consultas
-			$sql_query = 'SELECT username,user,email FROM utilizadores';
+			$sql_query = 'SELECT u.username,u.user,u.email, p.designation  FROM utilizadores u JOIN profile p on u.profile = p.code ORDER BY u.user;';
 			$stmt = $pdo->query($sql_query);
 
 			echo "<table border='1'>";
 			echo '<tr>';
-			echo '<td colspan="6">';				
+			echo '<td colspan="7">';				
 			echo 'Total de linhas: ' . $stmt->rowCount();
 			echo '</td>';
 			echo '<tr >';
 			echo '<td> Username </td>';
 			echo '<td> Utilizador </td>';
 			echo '<td> email </td>';
+			echo '<td> perfil </td>';
 			echo '<td colspan="3"> &nbsp; </td>';
 			echo '</tr >';
 
@@ -81,6 +82,7 @@
 				echo '<td>' . $row['username'] . '</td>';
 				echo '<td>' . $row['user'] . '</td>';
 				echo '<td>' . $row['email'] . '</td>';
+				echo '<td>' . $row['designation'] . '</td>';
 	//  Chamada a páginas de edição e eliminação usando o método GET, passando o username como parâmetro na query string            
 	//          echo '<td><a href="userEdit.php?username='.$row['username'].'"><img width="20" src="images\edit.webp" alt="Editar"></a></td>';
 	//          echo '<td><a href="userDelete.php?username='.$row['username'].'"><img width="20" src="images\delete.webp" alt="Eliminar"></a></td>';
