@@ -84,6 +84,22 @@
                         document.getElementById('frmPass').style.color='blue';
                     }
 
+//  Verificar preenchimento do campo Confirmar Password
+//  Altera-se formato e alerta-se o utilizador se o campo não estiver preenchido ou se não for igual ao campo Nova Password
+				    if (verPreenche(confPass)==false){		
+                        confPass.focus();
+                        document.getElementById('frmConfPass').style.color='red';
+                        txtStatus=txtStatus + "Confirmar Password nao esta preenchida \n ";
+                        valido=false;
+                    } else if (pass.value !== confPass.value){
+                        confPass.focus();
+                        document.getElementById('frmConfPass').style.color='red';
+                        txtStatus=txtStatus + "Passwords nao coincidem \n ";
+                        valido=false;
+                    }else {
+                        document.getElementById('frmConfPass').style.color='blue';
+                    }
+
 //  Verificar preenchimento do campo Nome de utilizador
 //  Altera-se formato e alerta-se o utilizador se o campo não estiver preenchido
 				    if (verPreenche(nome)==false){		
@@ -129,22 +145,7 @@
             if(isset($_POST["username"])){
                 printf("<br>A Inserir o utilizador ",$_POST['username']);
 
-//  Ligação à base de dados, igual ao exemplo de listar utilizadores (index.php)
-//                $host = 'php_crud-mysql-1';
-//                $db   = 'php_crud';
-//                $user = 'root';
-//                $pass = 'my5@fEp@s5';
-//                $charset = 'utf8mb4';
-
-//                $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-//                $options = [
-//                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-//                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-//                ];
-
                 try {
-//                    $pdo = new PDO($dsn, $user, $pass, $options);
-
 //  Converter e 'limpar' os dados recebidos do formulário
 //  A limpesa também podia ser feita no Javascript, antes do envio do formulário, mas é boa prática fazê-la no servidor
 //  -- operador 'null  coalescing' (??) evita aviso/erro por variáveis indefinidas/vazias
@@ -153,10 +154,11 @@
                     $pass     = $_POST["pass"] ?? "";   // não se faz trim() porque pode haver espaços na password...
                     $nome     = trim($_POST["nome"] ?? "");
                     $email    = trim($_POST["email"] ?? "");
+                    $profile  = trim($_POST["profile"] ?? "");
 
 //  Verifica se os campos obrigatórios estão preenchidos
 //  Tal como acima, a verificação no Javascript não elimina a necessidade de verificação no servidor
-                    if ($username === "" || $pass === "" || $nome === "" || $email === "") {
+                    if ($username === "" || $pass === "" || $nome === "" || $email === "" || $profile === "") {
                         die("Erro: campos obrigatórios em falta.");
                     }
 //  Verificar se o nome de utilizador já existe na base de dados                    
@@ -193,8 +195,8 @@
 //  em vez de valores diretos
 //  Além de ser uma boa-prática para facilitar leitura e manutenção do código
 //  O uso de "instruções preparadas" também é uma questão de segurança pois previne ataques de SQL Injection
-                    $sql = "INSERT INTO utilizadores (username, password, user, email)
-                            VALUES (:username, :password, :user, :email)";
+                    $sql = "INSERT INTO utilizadores (username, password, user, email, profile)
+                            VALUES (:username, :password, :user, :email, :profile)";
                     $stmt = $pdo->prepare($sql);
 
 //  Associar os valores aos parâmetros e executar a instrução
@@ -203,6 +205,7 @@
                         ":password" => $passHash,
                         ":user"     => $nome,
                         ":email"    => $email,
+                        ":profile"  => $profile,
                     ]);
 
                     echo "<br>Utilizador criado com sucesso: utilizador = '" .$username."'";
@@ -227,6 +230,11 @@
                             <td align="left"><input type="password" name="pass" size="40"></td>
                             <td align="left" width="25">*</td>
                         </tr>
+                        <tr id="frmConfPass" >
+                            <td align="right">Confirmar Password: </td>
+                            <td align="left"><input type="password" name="confPass" size="40"></td>
+                            <td align="left" width="25">*</td>
+                        </tr>
                         <tr id="frmNome" >
                             <td align="right">Nome: </td>
                             <td align="left"><input type="text" name="nome" size="40"></td>
@@ -237,6 +245,29 @@
                             <td align="left"><input type="text" name="email" size="40"></td>
                             <td align="left" width="25">*</td>
                         </tr>
+                            <tr id="frmProfile" >
+                                <td align="right"><label for="profile">Perfil: </label></td>
+                                <td align="left">
+                        <?php                               
+                            try {
+                                $pdo = new PDO($dsn, $user, $pass, $options);
+
+                                // A ligação foi bem sucedida, agora pode executar consultas
+                                $sql_query = 'SELECT p.code, p.designation  FROM profile p;';
+                                $stmt = $pdo->query($sql_query);     
+                                    echo '<select name="profile" id="profile">';
+                                    echo '<option value="">--Selecione um perfil--</option>';
+                                while ($row = $stmt->fetch()) {
+                                    echo '<option value="' . htmlspecialchars($row['code'], ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($row['designation'], ENT_QUOTES, 'UTF-8') . '</option>';
+                                }
+                                echo '</select>';
+                            } catch (PDOException $e) {
+                                echo "DB error: " . $e->getMessage();
+                            }
+                        ?>                                    
+                                </td>
+                                <td align="left" width="25">*</td>
+                            </tr>
                         <tr>
                             <td id="status" colspan="3">* preenchimeto obrigatorio</td>
                         </tr>

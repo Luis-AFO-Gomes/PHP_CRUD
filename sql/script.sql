@@ -93,6 +93,20 @@ BEGIN
 END //
 DELIMITER ;
 
+DROP FUNCTION IF EXISTS ufn_ExistsMail;
+
+DELIMITER //
+CREATE FUNCTION ufn_ExistsMail(var_email VARCHAR(64),var_username VARCHAR(30)) RETURNS BIT DETERMINISTIC
+BEGIN
+	DECLARE existe BIT;
+	SELECT COUNT(username) INTO existe 
+		FROM utilizadores u 
+		WHERE u.email = var_email AND (var_username IS NULL OR u.username != var_username);
+	RETURN existe;
+
+END //
+DELIMITER ;
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
