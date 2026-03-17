@@ -17,10 +17,7 @@
             "request": "launch",
             "url": "http://localhost/${fileBasename}",
             "webRoot": "${workspaceFolder}",
-            "runtimeExecutable": "stable",
-            "runtimeArgs": [
-                "--user-data-dir=${workspaceFolder}/.vscode/edge-debug-profile"
-            ]
+            "runtimeExecutable": "stable"
         },
         {
             "name": "Open site in Chrome",

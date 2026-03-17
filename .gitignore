@@ -1,0 +1,12 @@
+# root .gitignore
+
+# VS Code / browser debug temp profile
+.vscode/edge-debug-profile/
+.vscode/edge-debug-profile*/
+
+# logs
+*.log
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
