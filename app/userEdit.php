@@ -213,6 +213,19 @@
                         if ($username === "" || $nome === "" || $email === "" || $profile === "") {
                             die("Erro: campos obrigatórios em falta.");
                         }
+//  Verificar se o novo email já existe na base de dados                    
+                        $sql = "SELECT ufn_ExistsMail(:email, :username) AS emailExists";
+                        $stmt = $pdo->prepare($sql);
+
+                        $stmt->execute([
+                            ":email" => $email,
+                            ":username" => $username
+                        ]);
+                        
+                        $result = $stmt->fetch();
+                        if ($result && $result['emailExists'] == 1) {
+                            die("Erro: O email '" . $email . "' já existe. Por favor escolha outro email.");
+                        }
 
 //  Atualizar o utilizador na base de dados usando uma consulta SQL UPDATE
                         $sql_update = "UPDATE utilizadores SET user = :nome, email = :email, profile = :profile WHERE username = :username";
