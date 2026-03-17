@@ -159,10 +159,10 @@
                     if ($username === "" || $pass === "" || $nome === "" || $email === "") {
                         die("Erro: campos obrigatórios em falta.");
                     }
+//  Verificar se o nome de utilizador já existe na base de dados                    
                     $sql = "SELECT ufn_ExistsUser(:username) AS userExists";
                     $stmt = $pdo->prepare($sql);
 
-//  Associar os valores aos parâmetros e executar a instrução
                     $stmt->execute([
                         ":username" => $username
                     ]);
@@ -170,6 +170,18 @@
                     $result = $stmt->fetch();
                     if ($result && $result['userExists'] == 1) {
                         die("Erro: O nome de utilizador '" . $username . "' já existe. Por favor escolha outro nome de utilizador.");
+                    }
+//  Verificar se o email já existe na base de dados                    
+                    $sql = "SELECT ufn_ExistsUser(:email, NULL) AS emailExists";
+                    $stmt = $pdo->prepare($sql);
+
+                    $stmt->execute([
+                        ":email" => $email
+                    ]);
+                    
+                    $result = $stmt->fetch();
+                    if ($result && $result['emailExists'] == 1) {
+                        die("Erro: O email '" . $email . "' já existe. Por favor escolha outro email.");
                     }
 
 //  Encriptar a password - HASH - por segurança
