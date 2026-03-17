@@ -130,20 +130,20 @@
                 printf("<br>A Inserir o utilizador ",$_POST['username']);
 
 //  Ligação à base de dados, igual ao exemplo de listar utilizadores (index.php)
-                $host = 'php_crud-mysql-1';
-                $db   = 'php_crud';
-                $user = 'root';
-                $pass = 'my5@fEp@s5';
-                $charset = 'utf8mb4';
+//                $host = 'php_crud-mysql-1';
+//                $db   = 'php_crud';
+//                $user = 'root';
+//                $pass = 'my5@fEp@s5';
+//                $charset = 'utf8mb4';
 
-                $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-                $options = [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                ];
+//                $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+//                $options = [
+//                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+//                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+//                ];
 
                 try {
-                    $pdo = new PDO($dsn, $user, $pass, $options);
+//                    $pdo = new PDO($dsn, $user, $pass, $options);
 
 //  Converter e 'limpar' os dados recebidos do formulário
 //  A limpesa também podia ser feita no Javascript, antes do envio do formulário, mas é boa prática fazê-la no servidor
@@ -158,6 +158,18 @@
 //  Tal como acima, a verificação no Javascript não elimina a necessidade de verificação no servidor
                     if ($username === "" || $pass === "" || $nome === "" || $email === "") {
                         die("Erro: campos obrigatórios em falta.");
+                    }
+                    $sql = "SELECT ufn_ExistsUser(:username) AS userExists";
+                    $stmt = $pdo->prepare($sql);
+
+//  Associar os valores aos parâmetros e executar a instrução
+                    $stmt->execute([
+                        ":username" => $username
+                    ]);
+                    
+                    $result = $stmt->fetch();
+                    if ($result && $result['userExists'] == 1) {
+                        die("Erro: O nome de utilizador '" . $username . "' já existe. Por favor escolha outro nome de utilizador.");
                     }
 
 //  Encriptar a password - HASH - por segurança
