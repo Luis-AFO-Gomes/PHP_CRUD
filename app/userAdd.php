@@ -20,6 +20,7 @@
 		echo $_SERVER['SERVER_NAME'].'<br>';
 	Que não devolverá qualquer valor para servidor locais sem path definida
  */	
+	require_once __DIR__ . '/config.php';
 ?> 
 <html>
     <head>

@@ -12,14 +12,6 @@
   ------------------------------------------------------------------------------------>
 <?php
     $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
-/*	$pathOnly é utilizado para obter o caminho da página actual sem o nome do ficheiro para ser utilizado 
-	na construção do URL de redireccionamento para a página de login no caso de utilizador não identificado
-
-	Num servidor web pode utilizar-se a variável 'PATH_INFO', que não está definida quando se utiliza LOCALHOST
-	Pode-se testar esta variável utilizando
-		echo $_SERVER['SERVER_NAME'].'<br>';
-	Que não devolverá qualquer valor para servidor locais sem path definida
- */	
 	require_once __DIR__ . '/config.php';
 ?> 
 <html>
