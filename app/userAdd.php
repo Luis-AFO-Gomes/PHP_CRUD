@@ -172,7 +172,7 @@
                         die("Erro: O nome de utilizador '" . $username . "' já existe. Por favor escolha outro nome de utilizador.");
                     }
 //  Verificar se o email já existe na base de dados                    
-                    $sql = "SELECT ufn_ExistsUser(:email, NULL) AS emailExists";
+                    $sql = "SELECT ufn_ExistsMail(:email, NULL) AS emailExists";
                     $stmt = $pdo->prepare($sql);
 
                     $stmt->execute([
