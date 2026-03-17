@@ -1,0 +1,19 @@
+#frmUserName, #frmNome, #frmPass, #frmNewPass, #frmConfPass, #frmEmail, #frmProfile
+        {   color:              blue;
+            text-decoration:    none;
+            text-transform:     lowercase;
+            font-family: 		verdana;
+            font-size: 		    12
+        }
+        
+
+#status{    color:              black;
+            text-decoration:    none;
+            text-transform:     lowercase;
+            font-family:        verdana;
+            font-size:          10
+        }
+
+#icon   {   
+            width: 20px;
+        }

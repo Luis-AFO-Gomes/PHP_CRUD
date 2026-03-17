@@ -1,3 +1,5 @@
+
+<!DOCTYPE html>
 <!------------------------------------------------------------------------------------
   -- Acesso a Bases de Dados (MySQL) com PHP                                        --  
   -- Exemplo de ligação a uma base de dados MySQL usando PDO (PHP Data Objects)     --
@@ -26,7 +28,7 @@
     <head>
 	    <title>Exemplo Crud em PHP: Inserir Utilizador</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="stylesheet" href="style/style.css" type="text/css">
+        <link rel="stylesheet" href="<?php echo $pathOnly; ?>/style/forms.css" type="text/css">
 	
 	<script type="text/javascript">
 	    function verPreenche(campo){
@@ -128,6 +130,17 @@
                         document.getElementById('frmEmail').style.color='blue';
                     }
 
+//  Verificar preenchimento do campo Perfil
+//  Altera-se formato e alerta-se o utilizador se o campo não estiver preenchido
+				    if (verPreenche(profile)==false){		
+                        profile.focus();
+                        document.getElementById('frmProfile').style.color='red';
+                        txtStatus=txtStatus + "Perfil nao esta preenchido \n ";
+                        valido=false;
+                    } else {
+                        document.getElementById('frmProfile').style.color='blue';
+                    }
+
 
                 }
 
@@ -221,7 +234,7 @@
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" onsubmit="return validarForm(this);" method="post">
                     <table align="center">
                         <tr id="frmUserName">
-                            <td align="right" width="150">Nome de utilizador: </td>
+                            <td align="right" width="200">Nome de utilizador: </td>
                             <td align="left"><input type="text" name="username" size="40"></td>
                             <td align="left" width="25">*</td>
                         </tr>

@@ -12,6 +12,7 @@
   ------------------------------------------------------------------------------------>
 <?php
     $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+	require_once __DIR__ . '/config.php';
 ?> 
 
 <html>
@@ -19,7 +20,7 @@
 	    <title>Exemplo crUd em PHP: Alterar Password</title>
 
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="stylesheet" href="style/style.css" type="text/css">
+        <link rel="stylesheet" href="<?php echo $pathOnly; ?>/style/forms.css" type="text/css">
 
 	<script type="text/javascript">
 	    function verPreenche(campo){
@@ -46,11 +47,11 @@
 //  Altera-se formato e alerta-se o utilizador se o campo não estiver preenchido
                     if (verPreenche(oldPass)==false){				
                         oldPass.focus();
-                        document.getElementById('frmOldPass').style.color='red';
+                        document.getElementById('frmPass').style.color='red';
                         txtStatus=txtStatus + "Password antiga nao esta preenchida \n ";
                         valido=false;
                     } else {
-					    document.getElementById('frmOldPass').style.color='blue';
+					    document.getElementById('frmPass').style.color='blue';
 				    }
 
 //  Verificar preenchimento do campo Nova Password
@@ -110,7 +111,7 @@
 
                         <input type="hidden" name="username" value="<?php echo htmlspecialchars($username, ENT_QUOTES, 'UTF-8'); ?>">
                         <table align="center">
-                            <tr id="frmOldPass">
+                            <tr id="frmPass">
                                 <td align="right" width="150">Password antiga: </td>
                                 <td align="left"><input type="password" name="oldPass" size="40"></td>
                                 <td align="left" width="25">*</td>
@@ -138,21 +139,7 @@
         <?php 
                 } elseif ($action === 'save') {
 
-                    //  Ligação à base de dados, igual ao exemplo de listar utilizadores (index.php)
-                    $host = 'php_crud-mysql-1';
-                    $db   = 'php_crud';
-                    $user = 'root';
-                    $pass = 'my5@fEp@s5';
-                    $charset = 'utf8mb4';
-
-                    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-                    $options = [
-                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    ];
-
                 try {
-                    $pdo = new PDO($dsn, $user, $pass, $options);
 
                     $username = trim($_POST["username"] ?? "");
                     $oldPass  = trim($_POST["oldPass"] ?? "");

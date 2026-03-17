@@ -19,7 +19,7 @@
 	    <title>Exemplo crUd em PHP: Editar Utilizador</title>
         
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="stylesheet" href="style/style.css" type="text/css">
+        <link rel="stylesheet" href="<?php echo $pathOnly; ?>/style/forms.css" type="text/css">
 	
 	<script type="text/javascript">
 	    function verPreenche(campo){
@@ -94,6 +94,16 @@
                         document.getElementById('frmEmail').style.color='blue';
                     }
 
+//  Verificar preenchimento do campo Perfil
+//  Altera-se formato e alerta-se o utilizador se o campo não estiver preenchido
+				    if (verPreenche(profile)==false){		
+                        profile.focus();
+                        document.getElementById('frmProfile').style.color='red';
+                        txtStatus=txtStatus + "Perfil nao esta preenchido \n ";
+                        valido=false;
+                    } else {
+                        document.getElementById('frmProfile').style.color='blue';
+                    }
 
                 }
 
