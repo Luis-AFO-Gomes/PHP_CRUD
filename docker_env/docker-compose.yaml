@@ -4,6 +4,7 @@ services:
     web:
         image: nginx:latest # a declaração IMAGE significa que o serviço será executado segundo o comando DOKCER RUN
                             # todos os parâmetros têm que ser indicados dentro da configuração do serviço
+        restart: unless-stopped
         ports:
         - "80:80"
         volumes:            # VOLUMES mapeiam para pastas locais com caminho relativo
@@ -24,6 +25,7 @@ services:
             dockerfile: PHP.Dockerfile
                             # identificação do ficheiro DOCKERFILE
         
+        restart: unless-stopped
         env_file:
         - .env
         volumes:
@@ -39,6 +41,7 @@ services:
 
     mysql:
         image: mariadb:10.5
+        restart: unless-stopped
         environment:        # variaveis de ambiente, têm a mesma função de --ENV no comando DOCKER RUN
             MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
             MYSQL_DATABASE: ${DB_NAME}
