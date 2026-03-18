@@ -1,8 +1,15 @@
 <?php
     session_start();
-    $sessName   = ini_get('session.name');
-
     $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+
+    if(isset($_SESSION['user'] ) && isset($_SESSION['profile'] )) {
+		echo 'Sessão iniciada com utilizador '.$_SESSION['user'].' ('.$_SESSION['profile'].')<br>';
+		echo '<br>';
+		echo 'Aguarde, dentro de alguns segundos será reencaminhado para a página de inicial...';
+		echo '<script type="text/javascript">';
+		echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/index.php\'",5000)';
+		echo '</script>';		
+	}
 ?> 
 <html>
 	<head>
@@ -57,7 +64,7 @@
                     $username = $_POST["nome"] ?? "";
                     $password = $_POST["pass"] ?? "";
 
-                    $sql = "SELECT password,user,email FROM utilizadores WHERE username = :nome";
+                    $sql = "SELECT password,user,email,p.designation, p.code  FROM utilizadores u join profile p on u.profile = p.code  WHERE username = :nome";
                     $stmt = $pdo->prepare($sql);
                     $stmt->execute([':nome' => $username]);
                     // If you expect 1 row:
@@ -84,9 +91,13 @@
 
                         if (password_verify($password, $row['password'])) {
                             echo "<br>Utilizador <strong>" . htmlspecialchars($row['user']) . "</strong> identificado com sucesso<br>";
+                            echo "Perfil: " . htmlspecialchars($row['designation']) . "<br>";
                             echo "Email: " . htmlspecialchars($row['email']) . "<br>";
 //  Guardar dados do utilizador na sessão para podermos integar este login com os exemplos anteriores                            
-                            $_SESSION['log'] = $username;
+                            $_SESSION['user'] = $username;
+                            $_SESSION['pcode'] = $row['code'];
+                            $_SESSION['profile'] = $row['designation'];
+                            echo "<br><a href='$pathOnly/userList.php'>Ir para a lista de utilizadores</a>";
                         } else {
 //  Utilizador existe, mas a password está errada                            
                             echo "<br>Nome de utilizador ou palavra-passe inválidos.";

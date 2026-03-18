@@ -133,9 +133,17 @@
                                 <td colspan="3" align="center">
                                     <button type="submit" name="action" value="save">Guardar</button>
                                 </td>
+                                <td width="25">&nbsp;</td>
+                                <td align="left"><input type="reset" value="Cancelar"></td>
                             </tr>
                         </table>
                     </form>
+                    <table align="center">
+                        <tr>
+                            <td align="center">&nbsp;</td>
+                            <td align="center"><a href="<?php echo $pathOnly; ?>/userList.php">Voltar à Lista</a></td>
+                        </tr>
+                    </table>
         <?php 
                 } elseif ($action === 'save') {
 
@@ -169,16 +177,29 @@
                                 ':username' => $username
                             ]);
                             echo "<br>Password atualizada com sucesso.";
+                            echo "<br><a href='$pathOnly/userList.php'>Voltar à Lista</a>";
                         } else {
 //  A password antiga fornecida não é válida para o utilizador identificado, 
 //  por segurança a mensagem é genérica para não revelar qual o erro ocorrido (utilizador ou password errados)                            
-                            echo "<br>Nome de utilizador ou palavra-passe inválidos.";
+                            echo "<br>Nome de utilizador ou palavra-passe inválidos.<br>";
+                            echo '<form method="post" action="userPass.php" style="display:inline;">
+                                        <input type="hidden" name="username" value="'.htmlspecialchars($username, ENT_QUOTES, 'UTF-8').'">
+                                        <button type="submit" style="background:none;border:none;color:blue;text-decoration:underline;cursor:pointer;padding:0;">
+                                            Voltar à alteração de password
+                                        </button>
+                                    </form>';
                             exit;
                         }
                     } else {
 //  utilizador não existe
 //  por segurança a mensagem é genérica para não revelar qual o erro ocorrido (utilizador ou password errados)   
-                        echo "<br>Nome de utilizador ou palavra-passe inválidos.";
+                        echo "<br>Nome de utilizador ou palavra-passe inválidos.<br>";
+                        echo '<form method="post" action="userPass.php" style="display:inline;">
+                                    <input type="hidden" name="username" value="'.htmlspecialchars($username, ENT_QUOTES, 'UTF-8').'">
+                                    <button type="submit" style="background:none;border:none;color:blue;text-decoration:underline;cursor:pointer;padding:0;">
+                                        Voltar à alteração de password
+                                    </button>
+                                </form>';
                     }
                 } catch (PDOException $e) {
 // falha na ligação à base de dados                                           

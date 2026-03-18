@@ -53,6 +53,7 @@
                             ':username' => $username
                         ]);
                         echo "Utilizador eliminado com sucesso.";
+                        echo "<br><a href='$pathOnly/userList.php'>Voltar à Lista</a>";
 
                     } catch (PDOException $e) {
                         echo "Erro DB: " . $e->getMessage();

@@ -1,4 +1,27 @@
+<?php
+    session_start();
 
+    $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+
+	require_once __DIR__ . '/config.php';
+
+    if(isset($_SESSION['user']) && isset($_SESSION['pcode'] ) && isset($_SESSION['profile'] )) {
+        echo 'Utilizador ' . $_SESSION['user'] . ' com perfil ' . $_SESSION['profile'] . ' autenticado.<br>';
+        echo '<br>';
+        if($_SESSION['pcode'] != 'ADM') {
+            echo 'Acesso restrito a administradores. ';
+            echo '<script type="text/javascript">';
+            echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/userList.php\'",2000)';
+            echo '</script>';		
+            exit();
+        }
+    } else {	
+        echo '<script type="text/javascript">';
+        echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/index.php\'",0)';
+        echo '</script>';		
+        exit();
+    }
+?>
 <!DOCTYPE html>
 <!------------------------------------------------------------------------------------
   -- Acesso a Bases de Dados (MySQL) com PHP                                        --  
@@ -12,18 +35,6 @@
   --       user VARCHAR(50) NOT NULL IX,                                            --  
   --       email VARCHAR(640) NOT NULL AK                                           --  
   ------------------------------------------------------------------------------------>
-<?php
-    $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
-/*	$pathOnly é utilizado para obter o caminho da página actual sem o nome do ficheiro para ser utilizado 
-	na construção do URL de redireccionamento para a página de login no caso de utilizador não identificado
-
-	Num servidor web pode utilizar-se a variável 'PATH_INFO', que não está definida quando se utiliza LOCALHOST
-	Pode-se testar esta variável utilizando
-		echo $_SERVER['SERVER_NAME'].'<br>';
-	Que não devolverá qualquer valor para servidor locais sem path definida
- */	
-	require_once __DIR__ . '/config.php';
-?> 
 <html>
     <head>
 	    <title>Exemplo Crud em PHP: Inserir Utilizador</title>
@@ -222,6 +233,7 @@
                     ]);
 
                     echo "<br>Utilizador criado com sucesso: utilizador = '" .$username."'";
+                    echo "<br><a href='$pathOnly/userList.php'>Voltar à Lista</a>";
 
                 } catch (PDOException $e) {
                     echo "Erro DB: " . $e->getMessage();
@@ -285,10 +297,18 @@
                             <td id="status" colspan="3">* preenchimeto obrigatorio</td>
                         </tr>
                         <tr>
-                            <td colspan="3" align="center"><input type="submit" value="Continuar »"></td>
+                            <td align="right"><input type="submit" value="Continuar »"></td>
+                            <td width="25">&nbsp;</td>
+                            <td align="left"><input type="reset" value="Cancelar"></td>
                         </tr>
                     </table>
                 </form>
+                <table align="center">
+                    <tr>
+                        <td align="center"><a href="<?php echo $pathOnly; ?>/login.php">Voltar para Login</a></td>
+                        <td align="center"><a href="<?php echo $pathOnly; ?>/userList.php">Lista de utlizadores</a></td>
+                    </tr>
+                </table>
             <?php 
             } 
             ?>

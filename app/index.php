@@ -1,3 +1,16 @@
+<?php
+    session_start();
+
+    $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+
+	if(isset($_POST['out'])) { 
+		session_destroy();		
+//		header("Location: http://".$_SERVER['HTTP_HOST'].$pathOnly."/index.php");
+		header("location: ".$_SERVER['PHP_SELF']);
+	}
+
+	require_once __DIR__ . '/config.php';
+?> 
 <!------------------------------------------------------------------------------------
   -- Acesso a Bases de Dados (MySQL) com PHP                                        --  
   -- Exemplo de ligação a uma base de dados MySQL usando PDO (PHP Data Objects)     --
@@ -14,8 +27,6 @@
 	<title>Acesso a Bases de Dados (MySQL) com PHP</title>
 </head>    
     <?php
-
-	require_once __DIR__ . '/config.php';
 
 	// descomentar linha abaixo para verificar o DSN de ligação em output para ecrã
 	// echo 'dsn: '.$dsn;
@@ -75,5 +86,18 @@
 		// Tratamento de erros no acesso à tabela
 	} catch (PDOException $e) {
 		echo "Erro: " . $e->getMessage();
+	}
+
+	if(isset($_SESSION['user']) && isset($_SESSION['profile'])) {
+		echo 'Utilizador ' . $_SESSION['user'] . ' com perfil ' . $_SESSION['profile'] . ' autenticado.<br>';
+		echo '<form method="post" action="'.htmlspecialchars($_SERVER['PHP_SELF']).'" style="display:inline;">
+				<button type="submit" name="out" value="Log out" style="background:none;border:none;color:blue;text-decoration:underline;cursor:pointer;padding:0;">
+					Sair
+				</button>
+		</form>';
+		echo '<br>';
+	} else {	
+		echo 'Utilizador não autenticado. ';
+		echo '<a href="http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/login.php">fazer login</a>';
 	}
 ?>

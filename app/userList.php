@@ -1,3 +1,15 @@
+<?php
+    session_start();
+
+    $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+
+	if(isset($_POST['out'])) { 
+		session_destroy();		
+		header("Location: http://".$_SERVER['HTTP_HOST'].$pathOnly."/index.php");
+	}
+
+	require_once __DIR__ . '/config.php';
+?> 
 <!------------------------------------------------------------------------------------
   -- Acesso a Bases de Dados (MySQL) com PHP                                        --  
   -- Exemplo de ligação a uma base de dados MySQL usando PDO (PHP Data Objects)     --
@@ -22,53 +34,53 @@
 	</head> 
 	<body>
 		<?php
-		// Variáveis para ligação à base de dados
-		// alterar conforme a configuração do ambiente
-		// em ambiente de produção, estas variáveis não devem estar em ficheiro de código
-		// Não é obrigatótio definir os parâmetros de ligação numa variável, podem ser inseridos directamente no DSN
-		// mas é uma boa prática para facilitar a leitura e manutenção do código
-		$host = 'php_crud-mysql-1';
-		$db   = 'php_crud';
-		$user = 'root';
-		$pass = 'my5@fEp@s5';
-		$charset = 'utf8mb4';
 
-		// Data Source Name (DSN) - string de ligação à base de dados
-		$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-
-		// descomentar linha abaixo para verificar o DSN de ligação em output para ecrã
-		// echo 'dsn: '.$dsn;
-		// echo '<br />';
-
-		// também se pode usar console log do browser para ver o DSN
-		// é mais prático porque não interfere com a página apresentada no browser
-		// fazer F12 para abrir as ferramentas de desenvolvimento do browser
-		echo "<script>";
-		echo "console.log('(Javacsript) dsn: ".$dsn."')";
-		echo "</script>"; 
-		// Neste exemplo, a escrita em consola é feita em JavaScript por se tratar de uma funcionalidade do browser (client side)
-
-		// O PHP também tem a possibilidade de fazer log de erros:
-		// error_log('(em PHP)dsn: '.$dsn);
-		// Este log é escrito no ficheiro de log do servidor web (ex: Apache), não sendo visível no browser
-
-		$options = [
-			PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-		];
-
+			if(isset($_SESSION['user']) && isset($_SESSION['pcode'] ) && isset($_SESSION['profile'] )) {
+			echo 'Utilizador ' . $_SESSION['user'] . ' com perfil ' . $_SESSION['profile'] . ' autenticado.<br>';
+			echo '<form method="post" action="'.htmlspecialchars($_SERVER['PHP_SELF']).'" style="display:inline;">
+					<button type="submit" name="out" value="Log out" style="background:none;border:none;color:blue;text-decoration:underline;cursor:pointer;padding:0;">
+						Sair
+					</button>
+			</form>';
+			echo '<br>';
+		} else {	
+			echo 'Utilizador não autenticado.<br>';
+			echo 'Aguarde, dentro de alguns segundos será reencaminhado para a página de login...';
+			echo '<script type="text/javascript">';
+			echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/index.php\'",2000)';
+			echo '</script>';		
+			exit();
+		}
 		try {
-			$pdo = new PDO($dsn, $user, $pass, $options);
-
 			// A ligação foi bem sucedida, agora pode executar consultas
-			$sql_query = 'SELECT u.username,u.user,u.email, p.designation  FROM utilizadores u JOIN profile p on u.profile = p.code ORDER BY u.user;';
-			$stmt = $pdo->query($sql_query);
+			$sql_query = 'SELECT u.username,u.user,u.email, p.designation  FROM utilizadores u JOIN profile p on u.profile = p.code';
+// Se o utilizador autenticado não for administrador, só pode ver os seus próprios dados
+// Só administradores podem ver e editar os dados de outros utilizadores			
+			if($_SESSION['pcode'] != 'ADM') {
+				$sql_query .= ' WHERE u.username = :username';
+			}
+			$sql_query .= ' ORDER BY u.user;';
 
+			$stmt = $pdo->prepare($sql_query);
+			if($_SESSION['pcode'] != 'ADM') {
+				$stmt->execute([':username' => $_SESSION['user']]);
+			} else {
+				$stmt->execute();
+			}
+
+			
 			echo "<table border='1'>";
 			echo '<tr>';
-			echo '<td colspan="7">';				
+			echo '<td colspan="6">';				
 			echo 'Total de linhas: ' . $stmt->rowCount();
 			echo '</td>';
+//	Só administradores podem adicionar novos utilizadores						
+			if($_SESSION['pcode'] != 'ADM') {
+				echo '<td width="25">&nbsp;</td>';
+			} else {	
+				echo '<td width="25"><a href="userAdd.php"><img width="25" src="images/newUser.webp" alt="Adicionar Utilizador"></a></td>';
+			}
+			echo '</tr>';
 			echo '<tr >';
 			echo '<td> Username </td>';
 			echo '<td> Utilizador </td>';
@@ -87,7 +99,7 @@
 	//          echo '<td><a href="userEdit.php?username='.$row['username'].'"><img width="20" src="images\edit.webp" alt="Editar"></a></td>';
 	//          echo '<td><a href="userDelete.php?username='.$row['username'].'"><img width="20" src="images\delete.webp" alt="Eliminar"></a></td>';
 	//  Chamada a páginas de edição e eliminação usando o método POST, passando o username como parâmetro num campo oculto do formulário            
-				echo '<td>
+				echo '<td width="25">
 						<form method="post" action="userEdit.php" style="display:inline;">
 							<input type="hidden" name="username" value="'.htmlspecialchars($row['username'], ENT_QUOTES, 'UTF-8').'">
 							<button type="submit" name="action" value="edit" style="border:0;background:transparent;padding:0;cursor:pointer;">
@@ -96,7 +108,7 @@
 						</form>
 						</td>';
 
-				echo '<td>
+				echo '<td width="25">
 						<form method="post" action="userPass.php" style="display:inline;" onsubmit="return confirm(\'Alterar a password de '.htmlspecialchars($row['user'], ENT_QUOTES, 'UTF-8').'?\');">
 							<input type="hidden" name="username" value="'.htmlspecialchars($row['username'], ENT_QUOTES, 'UTF-8').'">
 							<button type="submit" name="action" value="pass" style="border:0;background:transparent;padding:0;cursor:pointer;">
@@ -104,16 +116,20 @@
 							</button>
 						</form>
 						</td>';
-
-				echo '<td>
-						<form method="post" action="userDel.php" style="display:inline;" onsubmit="return confirm(\'Eliminar utilizador '.htmlspecialchars($row['user'], ENT_QUOTES, 'UTF-8').'? \');">
-							<input type="hidden" name="username" value="'.htmlspecialchars($row['username'], ENT_QUOTES, 'UTF-8').'">
-							<button type="submit" name="action" value="delete" style="border:0;background:transparent;padding:0;cursor:pointer;">
-							<img width="20" src="images/delete.webp" alt="Eliminar">
-							</button>
-						</form>
-						</td>';
-				echo '</tr>';
+//	Um utilizador não administrador não pode eliminar outros utilizadores, mesmo que seja o próprio						
+				if($_SESSION['pcode'] != 'ADM') {
+					echo '<td width="25">&nbsp;</td>';
+				} else {	
+					echo '<td width="25">
+							<form method="post" action="userDel.php" style="display:inline;" onsubmit="return confirm(\'Eliminar utilizador '.htmlspecialchars($row['user'], ENT_QUOTES, 'UTF-8').'? \');">
+								<input type="hidden" name="username" value="'.htmlspecialchars($row['username'], ENT_QUOTES, 'UTF-8').'">
+								<button type="submit" name="action" value="delete" style="border:0;background:transparent;padding:0;cursor:pointer;">
+								<img width="20" src="images/delete.webp" alt="Eliminar">
+								</button>
+							</form>
+							</td>';
+					echo '</tr>';
+				}
 			}
 			echo '</table>';
 

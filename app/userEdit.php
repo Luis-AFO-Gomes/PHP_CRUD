@@ -172,12 +172,20 @@
                                 <td id="status" colspan="3">* preenchimeto obrigatorio</td>
                             </tr>
                             <tr>
-                                <td colspan="3" align="center">
+                                <td align="right">
                                     <button type="submit" name="action" value="save">Guardar</button>
                                 </td>
+                                <td width="25">&nbsp;</td>
+                                <td align="left"><input type="reset" value="Cancelar"></td>
                             </tr>
                         </table>
                     </form>
+                    <table align="center">
+                        <tr>
+                            <td align="center">&nbsp;</td>
+                            <td align="center"><a href="<?php echo $pathOnly; ?>/userList.php">Voltar à Lista</a></td>
+                        </tr>
+                    </table>
         <?php 
                     try {
     //  Obter dados de utilizador da base de dados e preencher o formulário de edição com os dados
@@ -249,6 +257,7 @@
                             ':username' => $username
                         ]);
                         echo "Utilizador atualizado com sucesso.";
+                        echo "<br><a href='$pathOnly/userList.php'>Voltar à Lista</a>";
 
                     } catch (PDOException $e) {
                         echo "Erro DB: " . $e->getMessage();
