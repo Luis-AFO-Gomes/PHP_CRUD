@@ -2,12 +2,14 @@
     session_start();
     $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
 
+    require_once __DIR__ . '/config.php';
+
     if(isset($_SESSION['user'] ) && isset($_SESSION['profile'] )) {
 		echo 'Sessão iniciada com utilizador '.$_SESSION['user'].' ('.$_SESSION['profile'].')<br>';
 		echo '<br>';
 		echo 'Aguarde, dentro de alguns segundos será reencaminhado para a página de inicial...';
 		echo '<script type="text/javascript">';
-		echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/index.php\'",5000)';
+		echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/index.php\'",2000)';
 		echo '</script>';		
 	}
 ?> 
@@ -41,7 +43,7 @@
   --       Estas funções permitem criar e manipular a estrutura de objectos da página de    --
   --       forma dinâmica, mas exigem uma abordagem diferente da escrita do código JS.      --
   -------------------------------------------------------------------------------------------->		
-		<link rel="stylesheet" href="style/style.css" type="text/css">
+		<link rel="stylesheet" href="style/forms.css" type="text/css">
 	
 		<script language="javascript" type="text/javascript" src="scripts/funcional.js">
 		</script>
@@ -51,8 +53,6 @@
 <!--       A variável de sessão com nome "<?php echo $sessName; ?>" foi criada.<br> -->
         <h1>Login - inserir credenciais válidas.</h1><br><br>
         <?php
-
-	        require_once __DIR__ . '/config.php';
 
             if(isset($_POST["nome"]) && isset($_POST["pass"])){
                 printf("<br>o utilizador %s está a fazer login para ",$_POST['nome']);

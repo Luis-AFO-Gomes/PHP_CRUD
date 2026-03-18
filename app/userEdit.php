@@ -1,3 +1,27 @@
+<?php
+    session_start();
+    $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+	require_once __DIR__ . '/config.php';
+
+    if(isset($_SESSION['user']) && isset($_SESSION['pcode'] ) && isset($_SESSION['profile'] )) {
+        echo 'Utilizador ' . $_SESSION['user'] . ' com perfil ' . $_SESSION['profile'] . ' autenticado.<br>';
+        echo '<br>';
+        if($_SESSION['pcode'] != 'ADM' && isset($_POST['username']) && $_SESSION['user'] != $_POST['username']) {
+            echo 'Utilizador só pode alterar os seus próprios dados... ';
+            echo '<script type="text/javascript">';
+            echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/userList.php\'",2000)';
+            echo '</script>';		
+            exit();
+         } 
+    } else {
+//  Redirect automático (sem tempo de espera) para a página de login se o utilizador não estiver autenticado
+//        echo 'Utilizador não autenticado.<br>';	
+        echo '<script type="text/javascript">';
+        echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/index.php\'",0)';
+        echo '</script>';		
+        exit();
+    }
+?> 
 <!------------------------------------------------------------------------------------
   -- Acesso a Bases de Dados (MySQL) com PHP                                        --  
   -- Exemplo de ligação a uma base de dados MySQL usando PDO (PHP Data Objects)     --
@@ -10,10 +34,7 @@
   --       user VARCHAR(50) NOT NULL IX,                                            --  
   --       email VARCHAR(640) NOT NULL AK                                           --  
   ------------------------------------------------------------------------------------>
-<?php
-    $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
-	require_once __DIR__ . '/config.php';
-?> 
+
 <html>
     <head>
 	    <title>Exemplo crUd em PHP: Editar Utilizador</title>
@@ -154,12 +175,32 @@
 			// A ligação foi bem sucedida, agora pode executar consultas
 			$sql_query = 'SELECT p.code, p.designation  FROM profile p;';
 			$stmt = $pdo->query($sql_query);     
+//  Se o utilizador autenticado não for administrador, não pode alterar o perfil do utilizador   
+//  criam-se dois perfis paralelos para o conteúdo da página para diferenciar o comportamento do formulário de edição de utilizadores 
+//  para administradores e não administradores                                 
+            if($_SESSION['pcode'] != 'ADM') {
+                echo '<select id="profile" disabled>';
+                echo '<option value="">--Selecione um perfil--</option>';
+                while ($row = $stmt->fetch()) {
+                    $selected = ($row['code'] == $userData['profile']) ? ' selected' : '';
+                    echo '<option value="' . htmlspecialchars($row['code'], ENT_QUOTES, 'UTF-8') . '"' . $selected . '>';
+                    echo htmlspecialchars($row['designation'], ENT_QUOTES, 'UTF-8');
+                    echo '</option>';
+                }
+                echo '</select>';
+
+                echo "<input type='hidden' name='profile' id='hiddenProfile' value=''>";
+            } else {
                 echo '<select name="profile" id="profile">';
                 echo '<option value="">--Selecione um perfil--</option>';
-			while ($row = $stmt->fetch()) {
-				echo '<option value="' . htmlspecialchars($row['code'], ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($row['designation'], ENT_QUOTES, 'UTF-8') . '</option>';
-			}
-            echo '</select>';
+                while ($row = $stmt->fetch()) {
+                    $selected = ($row['code'] == $userData['profile']) ? ' selected' : '';
+                    echo '<option value="' . htmlspecialchars($row['code'], ENT_QUOTES, 'UTF-8') . '"' . $selected . '>';
+                    echo htmlspecialchars($row['designation'], ENT_QUOTES, 'UTF-8');
+                    echo '</option>';
+                }
+                echo '</select>';
+            }
         } catch (PDOException $e) {
             echo "DB error: " . $e->getMessage();
         }
@@ -201,6 +242,7 @@
                             echo "document.getElementsByName('nome')[0].value = '".htmlspecialchars($userData['user'], ENT_QUOTES, 'UTF-8')."';";
                             echo "document.getElementsByName('email')[0].value = '".htmlspecialchars($userData['email'], ENT_QUOTES, 'UTF-8')."';";
                             echo "document.getElementById('profile').value = '".htmlspecialchars($userData['profile'], ENT_QUOTES, 'UTF-8')."';";
+                            echo "document.getElementById('hiddenProfile').value = '".htmlspecialchars($userData['profile'], ENT_QUOTES, 'UTF-8')."';";
                             echo "</script>";
                         } else {
                             echo "Utilizador não encontrado.";

@@ -7,6 +7,22 @@
 		session_destroy();		
 		header("Location: http://".$_SERVER['HTTP_HOST'].$pathOnly."/index.php");
 	}
+	if(isset($_SESSION['user']) && isset($_SESSION['pcode'] ) && isset($_SESSION['profile'] )) {
+		echo 'Utilizador ' . $_SESSION['user'] . ' com perfil ' . $_SESSION['profile'] . ' autenticado.<br>';
+		echo '<form method="post" action="'.htmlspecialchars($_SERVER['PHP_SELF']).'" style="display:inline;">
+				<button type="submit" name="out" value="Log out" style="background:none;border:none;color:blue;text-decoration:underline;cursor:pointer;padding:0;">
+					Sair
+				</button>
+		</form>';
+		echo '<br>';
+	} else {	
+		echo 'Utilizador não autenticado.<br>';
+		echo 'Aguarde, dentro de alguns segundos será reencaminhado para a página de login...';
+		echo '<script type="text/javascript">';
+		echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/index.php\'",0)';
+		echo '</script>';		
+		exit();
+	}
 
 	require_once __DIR__ . '/config.php';
 ?> 
@@ -33,24 +49,8 @@
 		</script>
 	</head> 
 	<body>
-		<?php
+	<?php
 
-			if(isset($_SESSION['user']) && isset($_SESSION['pcode'] ) && isset($_SESSION['profile'] )) {
-			echo 'Utilizador ' . $_SESSION['user'] . ' com perfil ' . $_SESSION['profile'] . ' autenticado.<br>';
-			echo '<form method="post" action="'.htmlspecialchars($_SERVER['PHP_SELF']).'" style="display:inline;">
-					<button type="submit" name="out" value="Log out" style="background:none;border:none;color:blue;text-decoration:underline;cursor:pointer;padding:0;">
-						Sair
-					</button>
-			</form>';
-			echo '<br>';
-		} else {	
-			echo 'Utilizador não autenticado.<br>';
-			echo 'Aguarde, dentro de alguns segundos será reencaminhado para a página de login...';
-			echo '<script type="text/javascript">';
-			echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/index.php\'",2000)';
-			echo '</script>';		
-			exit();
-		}
 		try {
 			// A ligação foi bem sucedida, agora pode executar consultas
 			$sql_query = 'SELECT u.username,u.user,u.email, p.designation  FROM utilizadores u JOIN profile p on u.profile = p.code';

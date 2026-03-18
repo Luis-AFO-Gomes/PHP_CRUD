@@ -1,3 +1,27 @@
+<?php
+    session_start();
+    $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+	require_once __DIR__ . '/config.php';
+
+    if(isset($_SESSION['user']) && isset($_SESSION['pcode'] ) && isset($_SESSION['profile'] )) {
+        echo 'Utilizador ' . $_SESSION['user'] . ' com perfil ' . $_SESSION['profile'] . ' autenticado.<br>';
+        echo '<br>';
+        if($_SESSION['pcode'] != 'ADM' && isset($_POST['username']) && $_SESSION['user'] != $_POST['username']) {
+            echo 'Utilizador só pode alterar os seus próprios dados... ';
+            echo '<script type="text/javascript">';
+            echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/userList.php\'",2000)';
+            echo '</script>';		
+            exit();
+         } 
+    } else {
+//  Redirect automático (sem tempo de espera) para a página de login se o utilizador não estiver autenticado
+//        echo 'Utilizador não autenticado.<br>';	
+        echo '<script type="text/javascript">';
+        echo 't=setTimeout("window.location=\'http://'.$_SERVER['HTTP_HOST'].$pathOnly.'/index.php\'",0)';
+        echo '</script>';		
+        exit();
+    }
+?> 
 <!------------------------------------------------------------------------------------
   -- Acesso a Bases de Dados (MySQL) com PHP                                        --  
   -- Exemplo de ligação a uma base de dados MySQL usando PDO (PHP Data Objects)     --
@@ -10,11 +34,6 @@
   --       user VARCHAR(50) NOT NULL IX,                                            --  
   --       email VARCHAR(640) NOT NULL AK                                           --  
   ------------------------------------------------------------------------------------>
-<?php
-    $pathOnly = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
-	require_once __DIR__ . '/config.php';
-?> 
-
 <html>
     <head>		
 	    <title>Exemplo crUd em PHP: Alterar Password</title>
